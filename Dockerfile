@@ -33,8 +33,10 @@ EXPOSE 4000
 
 
 FROM squid AS processor
+WORKDIR /squid
 CMD ["npm", "run", "processor:start"]
 
 
 FROM squid AS query-node
+WORKDIR /squid
 CMD ["npm", "run", "query-node:start"]

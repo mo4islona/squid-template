@@ -6,7 +6,6 @@ import {In} from "typeorm"
 import {Account, HistoricalBalance} from "./model"
 import {BalancesTransferEvent} from "./types/events"
 
-
 const processor = new SubstrateBatchProcessor()
     .setBatchSize(500)
     .setDataSource({
@@ -24,46 +23,14 @@ const processor = new SubstrateBatchProcessor()
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
 
+function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 processor.run(new TypeormDatabase(), async ctx => {
-    let transfers = getTransfers(ctx)
-
-    let accountIds = new Set<string>()
-    for (let t of transfers) {
-        accountIds.add(t.from)
-        accountIds.add(t.to)
+    while (true) {
+        await sleep(10000)
     }
-
-    let accounts = await ctx.store.findBy(Account, {id: In([...accountIds])}).then(accounts => {
-        return new Map(accounts.map(a => [a.id, a]))
-    })
-
-    let history: HistoricalBalance[] = []
-
-    for (let t of transfers) {
-        let from = getAccount(accounts, t.from)
-        let to = getAccount(accounts, t.to)
-
-        from.balance -= t.amount
-        to.balance += t.amount
-
-        history.push(new HistoricalBalance({
-            id: t.id + "-from",
-            account: from,
-            balance: from.balance,
-            timestamp: t.timestamp
-        }))
-
-        history.push(new HistoricalBalance({
-            id: t.id + "-to",
-            account: to,
-            balance: to.balance,
-            timestamp: t.timestamp
-        }))
-    }
-
-    await ctx.store.save(Array.from(accounts.values()))
-    await ctx.store.insert(history)
 })
 
 

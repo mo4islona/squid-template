@@ -10,6 +10,4 @@ deploy:
   addons:
     postgres:
   processor:
-    cmd: [ "node", "lib/processor" ]
   api:
-    cmd: [ "npx", "squid-graphql-server"]

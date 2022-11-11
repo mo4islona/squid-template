@@ -10,6 +10,10 @@ deploy:
   addons:
     postgres:
   processor:
+    env:
+      PROCESSOR_ENV: true
     cmd: [ "node", "lib/processor" ]
   api:
-    cmd: [ "npx", "squid-graphql-server"]
+    env:
+      API_ENV: true
+    cmd: [ "npx", "squid-graphql-server", "--subscriptions", "--max-root-fields", "10", "--sql-statement-timeout", "1000" ]
